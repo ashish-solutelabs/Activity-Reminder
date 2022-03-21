@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,14 +6,54 @@ import { TaskRepository } from './task.repository';
 import { Task } from './task.entity';
 import { TaskStatus } from './task-status.enum';
 import { User } from '../auth/user.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TasksService {
     constructor(
-        @InjectRepository(TaskRepository)
-        private taskRepository: TaskRepository,
+        @InjectRepository(TaskRepository) private taskRepository: TaskRepository 
     ) {}
+    private logger = new Logger('TaskService');
 
+
+    @Cron(CronExpression.EVERY_30_SECONDS,{
+        name: 'notifications',
+        timeZone: 'Asia/Kolkata'
+    })
+    async handleCron() {
+        const taskList = await this.taskRepository.find()
+        if (taskList) {
+            const now  = new Date()
+            console.log(now)
+            for(let taskdata of taskList){
+                let remindTime = new Date(taskdata.remindAt)
+                       
+                if((now.toLocaleDateString()===remindTime.toLocaleDateString()) && (now.getHours()===remindTime.getHours())&&(remindTime.getMinutes()===now.getMinutes()))
+                {
+                    const accountSid = 'AC0028c56f3e02c49da627e11420474a3f'; 
+                    const authToken = '60b4360f238a8e28d72d23517b631c87'; 
+                    const client = require('twilio')(accountSid, authToken); 
+                    const remindMsg = `title:${taskdata.title}\ndesc:${taskdata.description}`
+                    const status = await client.messages.create({ 
+                            body: remindMsg, 
+                            from: 'whatsapp:+14155238886',       
+                            to: 'whatsapp:+917285868035' 
+                        }) 
+                        .then((message: { sid: any; }) => this.logger.verbose(`sent massage id: "${message.sid}" `)) 
+                        .done();
+                    taskdata.status = TaskStatus.DONE
+                    try {
+                        await taskdata.save();
+                    } catch (error) {
+                            this.logger.error(`Failed to update status ${taskdata.id} `, error.stack);
+                            throw new InternalServerErrorException();
+                    }
+                }
+            }
+        }
+    }
+    
     async getTasks(
         filterDto: GetTasksFilterDto,
         user: User,
@@ -61,5 +101,4 @@ export class TasksService {
         await task.save();
         return task;
     }
-
 }

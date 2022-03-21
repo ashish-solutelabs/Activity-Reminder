@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TaskRepository } from './task.repository';
 import { AuthModule } from '../auth/auth.module';
 import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe';
+import { AppModule } from 'src/app.module';
+import { TwilioModule } from 'nestjs-twilio';
 
 @Module({
   imports: [

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TwilioModule } from 'nestjs-twilio';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
 import { Task } from './tasks/task.entity';
@@ -8,7 +10,9 @@ import { TasksModule } from './tasks/tasks.module';
 
 
 @Module({
-  imports: [ConfigModule.forRoot(),
+  imports: [
+    ScheduleModule.forRoot(),
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
     type: 'postgres',
     host: process.env.DATABASE_HOST, 
@@ -18,9 +22,7 @@ import { TasksModule } from './tasks/tasks.module';
     database: process.env.DATABASE_NAME,
     entities: [Task,User], 
     synchronize: true,
-  }),TasksModule,AuthModule,
-  
-],
+  }),TasksModule,AuthModule],
 })
 
 export class AppModule {}

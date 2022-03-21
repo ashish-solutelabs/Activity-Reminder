@@ -56,4 +56,23 @@ export class TaskRepository extends Repository<Task> {
         delete task.user;
         return task;
     }
+
+    async find(){
+        const query = this.createQueryBuilder('task');
+        query.andWhere('task.status = :status', { status:"OPEN" });
+        const tasklist  = await query.getMany();
+        return tasklist
+    }
+    // async updateTask(id:number,status: TaskStatus,user:User){
+    //     const query = this.createQueryBuilder('task');
+    //     query.where('task.user = :userId AND task.id =:id', { userId: user.id,id });
+    //     let task = await query.getOne();
+    //     task.status = status
+    //     try {
+    //         await task.save();
+    //     } catch (error) {
+    //         this.logger.error(`Failed to update a task for user "${user.username}"`, error.stack);
+    //         throw new InternalServerErrorException();
+    //     }
+    // }
 }
