@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './auth/user.entity';
 import { Task } from './tasks/task.entity';
 import { TasksModule } from './tasks/tasks.module';
+import { CronModule } from './cron/cron.module';
+import { Cronscheduler } from './cron/entities/cron.entity';
 
 
 @Module({
@@ -20,9 +22,9 @@ import { TasksModule } from './tasks/tasks.module';
     username: process.env.DATABASE_USER, 
     password: process.env.DATABASE_PASSWORD, 
     database: process.env.DATABASE_NAME,
-    entities: [Task,User], 
+    entities: [Task,User,Cronscheduler], 
     synchronize: true,
-  }),TasksModule,AuthModule],
+  }),TasksModule,AuthModule, CronModule],
 })
 
 export class AppModule {}

@@ -4,11 +4,14 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskStatus } from './task-status.enum';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { User } from '../auth/user.entity';
-import { Logger, InternalServerErrorException } from '@nestjs/common';
+import { Logger, InternalServerErrorException, Inject, forwardRef, NotAcceptableException } from '@nestjs/common';
+import { CronService } from 'src/cron/cron.service';
 
 @EntityRepository(Task)
+
 export class TaskRepository extends Repository<Task> {
     private logger = new Logger('TaskRepository');
+
     async getTasks(
         filterDto: GetTasksFilterDto,
         user: User,
@@ -46,15 +49,15 @@ export class TaskRepository extends Repository<Task> {
         task.status = TaskStatus.OPEN;
         task.remindAt = remindAt
         task.user = user;
-        try {
-            await task.save();
-        } catch (error) {
-            this.logger.error(`Failed to create a task for user "${user.username}". Data: ${JSON.stringify(createTaskDto)}`, error.stack);
-            throw new InternalServerErrorException();
-        }
 
-        delete task.user;
-        return task;
+        const status = await task.save()
+
+        if(!status){
+            throw new NotAcceptableException("Data is not store in server");
+        }
+        
+        delete status.user;
+        return status;
     }
 
     async find(){
@@ -63,6 +66,9 @@ export class TaskRepository extends Repository<Task> {
         const tasklist  = await query.getMany();
         return tasklist
     }
+    // async findById(id:number){
+
+    // }
     // async updateTask(id:number,status: TaskStatus,user:User){
     //     const query = this.createQueryBuilder('task');
     //     query.where('task.user = :userId AND task.id =:id', { userId: user.id,id });

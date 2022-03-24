@@ -7,6 +7,13 @@ localhost:3000/auth/signup
     "password":"Ashish@123"
 }   
 
+{
+    "username":"Ritul",
+    "email": "ritul99@gmail.com",
+    "phonenumber":"+918000247951",
+    "password":"Ashish@123"
+}
+
 signin
 localhost:3000/auth/signin
 {
@@ -16,11 +23,12 @@ localhost:3000/auth/signin
 
 
 add task 
+
 localhost:3000/tasks
 {
     "title":"meeting 2",
     "description":"metting schedule on time",
-    "remindAt":"20/01/2022 10:10:AM"
+    "remindAt":"2022-03-24T12:01:00.213Z"
 }
 
 localhost:3000/tasks/2

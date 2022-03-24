@@ -10,7 +10,6 @@ export class UserRepository extends Repository<User> {
     
     async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
         const { username, password } = authCredentialsDto;
-
         const user = new User();
         user.username = username;
         user.phoneNummber=authCredentialsDto.phonenumber
